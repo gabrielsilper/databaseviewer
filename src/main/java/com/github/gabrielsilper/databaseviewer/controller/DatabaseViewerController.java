@@ -1,6 +1,7 @@
 package com.github.gabrielsilper.databaseviewer.controller;
 
 import com.github.gabrielsilper.databaseviewer.viewer.DatabaseViewerService;
+import com.github.gabrielsilper.databaseviewer.viewer.ColumnInfo;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +30,8 @@ public class DatabaseViewerController {
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes,
-            @RequestParam(required = false) String database
+            @RequestParam(required = false) String database,
+            @RequestParam(required = false) String table
     ) {
         Object connectionIdAttribute = session.getAttribute(CONNECTION_ID);
 
@@ -62,6 +64,23 @@ public class DatabaseViewerController {
             }
 
             model.addAttribute("tables", tables);
+
+            List<ColumnInfo> columns = List.of();
+
+            String selectedTable = table == null ? "" : table.trim();
+            model.addAttribute("selectedTable", selectedTable);
+
+            if (!selectedDatabase.isEmpty() && !selectedTable.isEmpty()) {
+                List<ColumnInfo> loadedColumns = viewerService.findColumns(
+                        connectionId,
+                        selectedDatabase,
+                        selectedTable
+                );
+
+                columns = loadedColumns == null ? List.of() : loadedColumns;
+            }
+
+            model.addAttribute("columns", columns);
 
             return "database/viewer";
         } catch (RuntimeException exception) {

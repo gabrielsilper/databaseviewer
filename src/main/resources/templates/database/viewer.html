@@ -48,8 +48,11 @@
 
             <ul th:if="${selectedDatabase != null and !selectedDatabase.isEmpty() and tables != null and !#lists.isEmpty(tables)}">
                 <li th:each="table : ${tables}"
-                    th:text="${table}">
-                    Nome da tabela
+                    >
+                    <a th:href="@{/database/viewer(database=${selectedDatabase}, table=${table})}"
+                       th:text="${table}">
+                        Nome da tabela
+                    </a>
                 </li>
             </ul>
 
@@ -60,7 +63,36 @@
 
         <div class="viewer-panel panel-columns">
             <h2>Campos</h2>
-            <p>Os campos da tabela aparecerão aqui.</p>
+
+            <p th:if="${selectedTable == null or selectedTable.isEmpty()}">
+                Selecione uma tabela para visualizar seus campos.
+            </p>
+
+            <p th:if="${selectedTable != null and !selectedTable.isEmpty()}">
+                Tabela selecionada:
+                <strong th:text="${selectedTable}"></strong>
+            </p>
+
+            <table th:if="${selectedTable != null and !selectedTable.isEmpty() and not #lists.isEmpty(columns)}">
+                <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Aceita nulo?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="column : ${columns}">
+                    <td th:text="${column.name}">nome_coluna</td>
+                    <td th:text="${column.type}">tipo_coluna</td>
+                    <td th:text="${column.nullable}">is_nula</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p th:if="${selectedTable != null and !selectedTable.isEmpty() and #lists.isEmpty(columns)}">
+                Nenhum campo foi encontrado.
+            </p>
         </div>
 
         <div class="viewer-panel panel-relationships">

@@ -30,8 +30,26 @@ public class DatabaseViewerService {
         ConnectionContext context = connectionService.get(connectionId);
         JdbcTemplate jdbcTemplate = context.jdbcTemplate();
 
-        String sql = "call sp_lista_nomes_tabelas(?);";
+        String sql = "CALL sp_lista_nomes_tabelas(?);";
 
         return jdbcTemplate.queryForList(sql, String.class, database);
+    }
+
+    public List<ColumnInfo> findColumns(UUID connectionId, String database, String table) {
+        ConnectionContext context = connectionService.get(connectionId);
+        JdbcTemplate jdbcTemplate = context.jdbcTemplate();
+
+        String sql = "CALL sp_lista_nomes_colunas(?, ?);";
+
+        return jdbcTemplate.query(
+                sql,
+                (resultSet, rowNum) -> new ColumnInfo(
+                        resultSet.getString("nome_coluna"),
+                        resultSet.getString("tipo_coluna"),
+                        resultSet.getString("is_nula")
+                ),
+                database,
+                table
+        );
     }
 }
