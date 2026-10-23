@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Conectar ao banco</title>
+</head>
+<body>
+<main>
+    <h1>Conectar ao banco MySQL</h1>
+
+    <p th:if="${successMessage}" th:text="${successMessage}"></p>
+    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+    <p th:if="${connectionId}">
+        Conectado. ID da conexão:
+        <code th:text="${connectionId}"></code>
+    </p>
+
+    <form th:action="@{/database/connect}"
+          th:object="${connectionForm}"
+          method="post">
+
+        <label for="host">Host</label>
+        <input id="host" type="text" th:field="*{host}" placeholder="localhost">
+
+        <label for="port">Porta</label>
+        <input id="port" type="number" th:field="*{port}" placeholder="3306">
+
+        <label for="database">Banco</label>
+        <input id="database" type="text" th:field="*{database}" placeholder="meu_banco">
+
+        <label for="username">Usuário</label>
+        <input id="username" type="text" th:field="*{username}">
+
+        <label for="password">Senha</label>
+        <input id="password" type="password" th:field="*{password}">
+
+        <button type="submit">Conectar</button>
+    </form>
+</main>
+</body>
+</html>
