@@ -48,7 +48,7 @@
 
             <ul th:if="${selectedDatabase != null and !selectedDatabase.isEmpty() and tables != null and !#lists.isEmpty(tables)}">
                 <li th:each="table : ${tables}"
-                    >
+                >
                     <a th:href="@{/database/viewer(database=${selectedDatabase}, table=${table})}"
                        th:text="${table}">
                         Nome da tabela
@@ -97,7 +97,40 @@
 
         <div class="viewer-panel panel-relationships">
             <h2>Relacionamentos</h2>
-            <p>Os relacionamentos da tabela aparecerão aqui.</p>
+
+            <p th:if="${selectedTable == null or selectedTable.isEmpty()}">
+                Selecione uma tabela para visualizar seus relacionamentos.
+            </p>
+
+            <div class="relationship-side relationship-one-side">
+                <h3>Lado 1</h3>
+
+                <ul th:if="${selectedTable != null and !selectedTable.isEmpty() and not #lists.isEmpty(relationships.oneSide)}">
+                    <li th:each="relationship : ${relationships.oneSide}"
+                        th:text="${relationship}">
+                        Tabela relacionada
+                    </li>
+                </ul>
+
+                <p th:if="${selectedTable != null and !selectedTable.isEmpty() and #lists.isEmpty(relationships.oneSide)}">
+                    Nenhum relacionamento do lado 1.
+                </p>
+            </div>
+
+            <div class="relationship-side relationship-many-side">
+                <h3>Lado N</h3>
+
+                <ul th:if="${selectedTable != null and !selectedTable.isEmpty() and not #lists.isEmpty(relationships.manySide)}">
+                    <li th:each="relationship : ${relationships.manySide}"
+                        th:text="${relationship}">
+                        Tabela relacionada
+                    </li>
+                </ul>
+
+                <p th:if="${selectedTable != null and !selectedTable.isEmpty() and #lists.isEmpty(relationships.manySide)}">
+                    Nenhum relacionamento do lado N.
+                </p>
+            </div>
         </div>
 
     </div>

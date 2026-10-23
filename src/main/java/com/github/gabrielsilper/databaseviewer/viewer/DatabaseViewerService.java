@@ -52,4 +52,41 @@ public class DatabaseViewerService {
                 table
         );
     }
+
+    public RelationshipInfo findRelationships(
+            UUID connectionId,
+            String database,
+            String table
+    ) {
+        ConnectionContext context = connectionService.get(connectionId);
+        JdbcTemplate jdbcTemplate = context.jdbcTemplate();
+
+        // TODO: informe aqui o SQL dos relacionamentos do lado 1.
+        String sqlOneSide = "";
+
+        // TODO: informe aqui o SQL dos relacionamentos do lado N.
+        String sqlManySide = "";
+
+        if (sqlOneSide.isBlank() || sqlManySide.isBlank()) {
+            return RelationshipInfo.empty();
+        }
+
+        List<String> oneSide = jdbcTemplate.queryForList(
+                sqlOneSide,
+                String.class,
+                database,
+                table
+        );
+        List<String> manySide = jdbcTemplate.queryForList(
+                sqlManySide,
+                String.class,
+                database,
+                table
+        );
+
+        return new RelationshipInfo(
+                oneSide == null ? List.of() : oneSide,
+                manySide == null ? List.of() : manySide
+        );
+    }
 }

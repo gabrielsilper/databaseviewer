@@ -2,6 +2,7 @@ package com.github.gabrielsilper.databaseviewer.controller;
 
 import com.github.gabrielsilper.databaseviewer.viewer.DatabaseViewerService;
 import com.github.gabrielsilper.databaseviewer.viewer.ColumnInfo;
+import com.github.gabrielsilper.databaseviewer.viewer.RelationshipInfo;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -81,6 +82,22 @@ public class DatabaseViewerController {
             }
 
             model.addAttribute("columns", columns);
+
+            RelationshipInfo relationships = RelationshipInfo.empty();
+
+            if (!selectedDatabase.isEmpty() && !selectedTable.isEmpty()) {
+                RelationshipInfo loadedRelationships = viewerService.findRelationships(
+                        connectionId,
+                        selectedDatabase,
+                        selectedTable
+                );
+
+                if (loadedRelationships != null) {
+                    relationships = loadedRelationships;
+                }
+            }
+
+            model.addAttribute("relationships", relationships);
 
             return "database/viewer";
         } catch (RuntimeException exception) {

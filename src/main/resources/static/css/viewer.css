@@ -51,6 +51,20 @@ main {
     background-color: #f1e4ff;
 }
 
+.relationship-side {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.relationship-one-side {
+    background-color: #e8f4ff;
+}
+
+.relationship-many-side {
+    background-color: #f6eaff;
+}
+
 .viewer-panel h2,
 .viewer-panel p,
 .viewer-panel li,
