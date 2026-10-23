@@ -34,9 +34,8 @@ public class DatabaseConnectController {
     }
 
     @GetMapping
-    public String showForm(HttpSession session, Model model) {
+    public String showForm(Model model) {
         model.addAttribute("connectionForm", new ConnectionForm());
-        model.addAttribute("connectionId", session.getAttribute(CONNECTION_ID));
         return "database/connect";
     }
 
@@ -57,10 +56,7 @@ public class DatabaseConnectController {
                     new ConnectionSessionBinding(connectionRegistry, connectionId)
             );
 
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Conexão realizada com sucesso."
-            );
+            return "redirect:/database/viewer";
         } catch (RuntimeException exception) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",

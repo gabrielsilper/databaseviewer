@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Database Viewer</title>
+    <link rel="stylesheet" th:href="@{/css/viewer.css}">
+</head>
+<body>
+<main>
+    <div class="viewer-header">
+        <h1>Bancos disponíveis</h1>
+        <a class="disconnect-link" th:href="@{/database/connect}">
+            Sair da conexão
+        </a>
+    </div>
+
+    <div class="viewer-container">
+
+        <div class="viewer-panel panel-databases">
+            <h2>Bancos</h2>
+
+            <ul th:if="${not #lists.isEmpty(databases)}">
+                <li th:each="database : ${databases}">
+                    <a th:href="@{/database/viewer(database=${database})}"
+                       th:text="${database}">
+                        Nome do banco
+                    </a>
+                </li>
+            </ul>
+
+            <p th:if="${#lists.isEmpty(databases)}">
+                Nenhum banco foi encontrado.
+            </p>
+
+        </div>
+
+        <div class="viewer-panel panel-tables">
+            <h2>Tabelas</h2>
+
+            <p th:if="${selectedDatabase != null and !selectedDatabase.isEmpty()}">
+                Banco selecionado:
+                <strong th:text="${selectedDatabase}"></strong>
+            </p>
+
+            <p th:if="${selectedDatabase == null or selectedDatabase.isEmpty()}">
+                Selecione um banco para visualizar suas tabelas.
+            </p>
+
+            <ul th:if="${selectedDatabase != null and !selectedDatabase.isEmpty() and tables != null and !#lists.isEmpty(tables)}">
+                <li th:each="table : ${tables}"
+                    th:text="${table}">
+                    Nome da tabela
+                </li>
+            </ul>
+
+            <p th:if="${selectedDatabase != null and !selectedDatabase.isEmpty() and (tables == null or #lists.isEmpty(tables))}">
+                Nenhuma tabela foi encontrada.
+            </p>
+        </div>
+
+        <div class="viewer-panel panel-columns">
+            <h2>Campos</h2>
+            <p>Os campos da tabela aparecerão aqui.</p>
+        </div>
+
+        <div class="viewer-panel panel-relationships">
+            <h2>Relacionamentos</h2>
+            <p>Os relacionamentos da tabela aparecerão aqui.</p>
+        </div>
+
+    </div>
+</main>
+</body>
+</html>

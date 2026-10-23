@@ -8,13 +8,7 @@
 <main>
     <h1>Conectar ao banco MySQL</h1>
 
-    <p th:if="${successMessage}" th:text="${successMessage}"></p>
     <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-    <p th:if="${connectionId}">
-        Conectado. ID da conexão:
-        <code th:text="${connectionId}"></code>
-    </p>
 
     <form th:action="@{/database/connect}"
           th:object="${connectionForm}"
