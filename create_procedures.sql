@@ -48,7 +48,7 @@ create procedure sp_lista_nomes_tabelas_lado_1(
     p_table_name varchar(50)
 )
 begin
-    SELECT DISTINCT
+    SELECT
         REFERENCED_TABLE_NAME as nome_tabela
     FROM
         information_schema.KEY_COLUMN_USAGE
@@ -67,7 +67,7 @@ create procedure sp_lista_nomes_tabelas_lado_n(
     p_table_name varchar(50)
 )
 begin
-    SELECT DISTINCT
+    SELECT
         TABLE_NAME as nome_tabela
     FROM
         information_schema.KEY_COLUMN_USAGE
