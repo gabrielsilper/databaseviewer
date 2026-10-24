@@ -42,3 +42,39 @@ end$$
 delimiter ;
 
 -- Minha procedures para listar os nomes das tabelas lado 1 e lado n
+delimiter $$
+create procedure sp_lista_nomes_tabelas_lado_1(
+    p_schema varchar(50),
+    p_table_name varchar(50)
+)
+begin
+    SELECT DISTINCT
+        REFERENCED_TABLE_NAME as nome_tabela
+    FROM
+        information_schema.KEY_COLUMN_USAGE
+    WHERE
+        TABLE_SCHEMA = p_schema
+        AND TABLE_NAME = p_table_name
+        AND REFERENCED_TABLE_SCHEMA = p_schema
+        AND REFERENCED_TABLE_NAME IS NOT NULL
+    ORDER BY TABLE_NAME;
+end$$
+delimiter ;
+
+delimiter $$
+create procedure sp_lista_nomes_tabelas_lado_n(
+    p_schema varchar(50),
+    p_table_name varchar(50)
+)
+begin
+    SELECT DISTINCT
+        TABLE_NAME as nome_tabela
+    FROM
+        information_schema.KEY_COLUMN_USAGE
+    WHERE
+        REFERENCED_TABLE_SCHEMA = p_schema
+        AND REFERENCED_TABLE_NAME = p_table_name
+        AND TABLE_SCHEMA = p_schema
+    ORDER BY TABLE_NAME;
+end$$
+delimiter ;

@@ -61,23 +61,19 @@ public class DatabaseViewerService {
         ConnectionContext context = connectionService.get(connectionId);
         JdbcTemplate jdbcTemplate = context.jdbcTemplate();
 
-        // TODO: informe aqui o SQL dos relacionamentos do lado 1.
-        String sqlOneSide = "";
+        List<String> oneSide;
+        List<String> manySide;
 
-        // TODO: informe aqui o SQL dos relacionamentos do lado N.
-        String sqlManySide = "";
+        String sqlOneSide = "CALL sp_lista_nomes_tabelas_lado_1(?, ?);";
+        String sqlManySide = "CALL sp_lista_nomes_tabelas_lado_n(?, ?);";
 
-        if (sqlOneSide.isBlank() || sqlManySide.isBlank()) {
-            return RelationshipInfo.empty();
-        }
-
-        List<String> oneSide = jdbcTemplate.queryForList(
+        oneSide = jdbcTemplate.queryForList(
                 sqlOneSide,
                 String.class,
                 database,
                 table
         );
-        List<String> manySide = jdbcTemplate.queryForList(
+        manySide = jdbcTemplate.queryForList(
                 sqlManySide,
                 String.class,
                 database,
@@ -85,8 +81,8 @@ public class DatabaseViewerService {
         );
 
         return new RelationshipInfo(
-                oneSide == null ? List.of() : oneSide,
-                manySide == null ? List.of() : manySide
+                oneSide,
+                manySide
         );
     }
 }
