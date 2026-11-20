@@ -2,10 +2,13 @@
 -- TESTES DE PROCEDURES E TRANSAÇÕES
 -- =====================================================================
 -- Pré-requisitos:
---   1. Banco do Dump20260727.sql carregado.
---   2. aula-26-10-26.sql (tabela funcionariocomissao, sp_ajusta_fc_comissao
---      e trigger tg_atualiza_saldo_produto).
---   3. create_procedures.sql.
+--   1. dumpstate.sql carregado (já traz a tabela funcionariocomissao,
+--      a sp_ajusta_fc_comissao e o trigger tg_atualiza_saldo_produto).
+--   2. create_procedures.sql.
+--
+-- As procedures NÃO abrem transação. Sempre que o teste precisa de
+-- atomicidade, a transação é aberta aqui, explicitamente:
+--   start transaction; call ...; call ...; commit;   (ou rollback;)
 --
 -- COMO RODAR OS TESTES DE ISOLAMENTO (partes 1 a 4):
 --   É preciso ter DUAS CONEXÕES DIFERENTES com o banco, uma para a
@@ -107,8 +110,11 @@ start transaction;
 call sp_total_vendas_vendedor(9, year(curdate()), month(curdate()));
 -- anote qtde_vendas e valor_total (pode vir vazio se não houver vendas no mês)
 
--- 2) [SESSÃO A] registra uma venda nova para o vendedor 9 (a sp faz commit sozinha)
-call sp_registra_venda(300, 2, 8, 9, 1, 21, 1);
+-- 2) [SESSÃO A] registra uma venda nova para o vendedor 9 e confirma
+start transaction;
+call sp_abre_venda(300, 2, 8, 9, 1);
+call sp_adiciona_item_venda(300, 21, 1);
+commit;
 
 -- 3) [SESSÃO B] repete a consulta, NA MESMA TRANSAÇÃO
 call sp_total_vendas_vendedor(9, year(curdate()), month(curdate()));
@@ -124,14 +130,16 @@ call sp_total_vendas_vendedor(9, year(curdate()), month(curdate()));
 -- usa "for update": o saldo do estoque não pode ser lido da "foto antiga".
 
 -- 5) [SESSÃO A] limpeza (opcional): desfaz a venda 300
---    (saldo volta, e a comissão é recalculada pela procedure da aula)
+--    (saldo volta, e a comissão do mês é recalculada)
+--    O trigger só roda no insert, então no delete recalculamos à mão.
 start transaction;
 delete from itemvenda where itvvencodigo = 300;
 delete from venda where vencodigo = 300;
 update produto set prosaldo = prosaldo + 1 where procodigo = 21;
+delete from funcionariocomissao
+where fcfuncodigo = 9 and fcano = year(curdate()) and fcmes = month(curdate());
+call sp_ajusta_fc_comissao(9, year(curdate()), month(curdate()));
 commit;
-delete from funcionariocomissao where fcfuncodigo = 9;   -- recalcula a comissão do zero
-call sp_ajusta_fc_comissao(9);
 
 
 -- =====================================================================
@@ -189,8 +197,9 @@ update produto set prosaldo = @saldo_original_7 where procodigo = 7;
 -- =====================================================================
 -- PARTE 5 - GRAN FINALE: FLUXO DE VENDA (uma sessão só)
 -- =====================================================================
--- sp_registra_venda faz, em UMA transação:
---   venda -> baixa saldo (for update) -> itemvenda (+ trigger da comissão)
+-- Em UMA transação, aberta aqui (é o que a página de venda faz no Java):
+--   sp_abre_venda -> sp_adiciona_item_venda
+--     (baixa saldo com for update -> itemvenda -> trigger da comissão)
 --   -> commit
 -- Se qualquer passo falhar: rollback de TUDO.
 -- ---------------------------------------------------------------------
@@ -203,7 +212,10 @@ select * from funcionariocomissao where fcfuncodigo = 9;
 
 -- CENÁRIO DE SUCESSO ---------------------------------------------------
 -- venda 301: filial 2, cliente 8, vendedor 9, Dinheiro, produto 21, qtde 2
-call sp_registra_venda(301, 2, 8, 9, 1, 21, 2);
+start transaction;
+call sp_abre_venda(301, 2, 8, 9, 1);
+call sp_adiciona_item_venda(301, 21, 2);
+commit;
 
 select * from venda where vencodigo = 301;            -- a venda existe
 select * from itemvenda where itvvencodigo = 301;     -- o item existe
@@ -215,8 +227,12 @@ select * from funcionariocomissao where fcfuncodigo = 9;  -- comissão do mês a
 -- venda 302: os dados da venda são válidos, então a venda É INSERIDA...
 -- mas o item pede 99 unidades do produto 7, que não tem esse saldo.
 -- O erro acontece depois do insert da venda -> rollback desfaz o insert.
-call sp_registra_venda(302, 2, 8, 9, 1, 7, 99);
+start transaction;
+call sp_abre_venda(302, 2, 8, 9, 1);         -- ok: a venda 302 é inserida
+call sp_adiciona_item_venda(302, 7, 99);
 -- Error Code: 1644. Saldo insuficiente para o produto 7: saldo 3, pedido 99.
+select * from venda where vencodigo = 302;   -- DENTRO da transação a venda aparece...
+rollback;                                    -- ...então desistimos de tudo
 
 select * from venda where vencodigo = 302;            -- vazio: a venda NÃO ficou
 select * from itemvenda where itvvencodigo = 302;     -- vazio
@@ -224,8 +240,27 @@ select procodigo, pronome, prosaldo from produto
 where procodigo = 7;                                  -- saldo continua 3
 select * from funcionariocomissao where fcfuncodigo = 9;  -- comissão igual à de depois da venda 301
 
--- OUTRAS FALHAS (todas terminam em rollback, nada é gravado) -----------
-call sp_registra_venda(303, 2, 9999, 9, 1, 21, 1);    -- cliente inexistente
-call sp_registra_venda(303, 2, 8, 9, 1, 2, 1);        -- produto 2 está inativo
-call sp_registra_venda(303, 2, 8, 9, 1, 21, 0);       -- quantidade inválida
-call sp_registra_venda(301, 2, 8, 9, 1, 21, 1);       -- código 301 já existe (PK)
+-- OUTRAS FALHAS (rode cada bloco; todos terminam em rollback) ----------
+start transaction;
+call sp_abre_venda(303, 2, 9999, 9, 1);       -- cliente inexistente
+rollback;
+
+start transaction;
+call sp_abre_venda(303, 2, 8, 6, 1);          -- vendedor 6 foi desligado
+rollback;
+
+start transaction;
+call sp_abre_venda(303, 2, 8, 9, 1);
+call sp_adiciona_item_venda(303, 2, 1);       -- produto 2 está inativo
+rollback;
+
+start transaction;
+call sp_abre_venda(303, 2, 8, 9, 1);
+call sp_adiciona_item_venda(303, 21, 0);      -- quantidade inválida
+rollback;
+
+start transaction;
+call sp_abre_venda(301, 2, 8, 9, 1);          -- código 301 já existe
+rollback;
+
+select * from venda where vencodigo = 303;    -- vazio: nada foi gravado

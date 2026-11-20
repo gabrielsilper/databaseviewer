@@ -1414,6 +1414,95 @@ INSERT INTO `zona` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `funcionariocomissao` (aula 26/10)
+-- Comissão de cada funcionário por mês/ano.
+-- Valor = soma de (preço do produto * quantidade * % de comissão do grupo).
+--
+
+DROP TABLE IF EXISTS `funcionariocomissao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `funcionariocomissao` (
+  `fcfuncodigo` int(11) NOT NULL,
+  `fcano` int(11) NOT NULL,
+  `fcmes` int(11) NOT NULL,
+  `fcvalor` double NOT NULL DEFAULT 0,
+  PRIMARY KEY (`fcfuncodigo`,`fcano`,`fcmes`),
+  CONSTRAINT `fk_fc_funcodigo` FOREIGN KEY (`fcfuncodigo`) REFERENCES `funcionario` (`funcodigo`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Carga inicial de `funcionariocomissao` a partir das vendas já existentes
+--
+
+INSERT INTO `funcionariocomissao` (fcfuncodigo, fcano, fcmes, fcvalor)
+SELECT
+    venfuncodigo,
+    YEAR(vendata),
+    MONTH(vendata),
+    ROUND(SUM(propreco * itvqtde * (grpcomissao / 100)), 2)
+FROM
+    itemvenda
+    JOIN venda ON vencodigo = itvvencodigo
+    JOIN produto ON procodigo = itvprocodigo
+    JOIN grupoproduto ON grpcodigo = progrpcodigo
+GROUP BY
+    venfuncodigo,
+    YEAR(vendata),
+    MONTH(vendata);
+
+--
+-- Comissão: procedure + trigger (aula 26/10)
+-- Diferente da aula, a procedure recalcula SÓ o mês/ano informado.
+-- Assim um reajuste de preço não reescreve comissões de meses já fechados.
+-- O trigger roda DENTRO da transação do insert em itemvenda: se a venda
+-- sofrer rollback, a comissão volta junto.
+--
+
+DROP TRIGGER IF EXISTS `tg_atualiza_saldo_produto`;
+DROP PROCEDURE IF EXISTS `sp_ajusta_fc_comissao`;
+DELIMITER ;;
+CREATE PROCEDURE `sp_ajusta_fc_comissao`(p_funcodigo int, p_ano int, p_mes int)
+begin
+    INSERT INTO funcionariocomissao (fcfuncodigo, fcano, fcmes, fcvalor)
+    SELECT
+        venfuncodigo,
+        YEAR(vendata),
+        MONTH(vendata),
+        ROUND(SUM(propreco * itvqtde * (grpcomissao / 100)), 2)
+    FROM
+        itemvenda
+        JOIN venda ON vencodigo = itvvencodigo
+        JOIN produto ON procodigo = itvprocodigo
+        JOIN grupoproduto ON grpcodigo = progrpcodigo
+    WHERE
+        venfuncodigo = p_funcodigo
+        AND YEAR(vendata) = p_ano
+        AND MONTH(vendata) = p_mes
+    GROUP BY
+        venfuncodigo,
+        YEAR(vendata),
+        MONTH(vendata)
+    ON DUPLICATE KEY UPDATE
+        fcvalor = VALUES(fcvalor);
+end ;;
+
+CREATE TRIGGER `tg_atualiza_saldo_produto` AFTER INSERT ON `itemvenda`
+FOR EACH ROW
+begin
+    declare v_funcodigo int default null;
+    declare v_vendata date default null;
+
+    SELECT venfuncodigo, vendata INTO v_funcodigo, v_vendata
+    FROM venda
+    WHERE vencodigo = new.itvvencodigo;
+
+    call sp_ajusta_fc_comissao(v_funcodigo, YEAR(v_vendata), MONTH(v_vendata));
+end ;;
+DELIMITER ;
+
+--
 -- Dumping routines for database 'bd2025'
 --
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
