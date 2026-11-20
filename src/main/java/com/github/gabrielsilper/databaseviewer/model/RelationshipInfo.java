@@ -1,4 +1,4 @@
-package com.github.gabrielsilper.databaseviewer.viewer;
+package com.github.gabrielsilper.databaseviewer.model;
 
 import java.util.List;
 

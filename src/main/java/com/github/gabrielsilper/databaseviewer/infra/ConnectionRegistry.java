@@ -1,4 +1,4 @@
-package com.github.gabrielsilper.databaseviewer.connection;
+package com.github.gabrielsilper.databaseviewer.infra;
 
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package com.github.gabrielsilper.databaseviewer.connection;
+package com.github.gabrielsilper.databaseviewer.infra;
 
 import jakarta.servlet.http.HttpSessionBindingEvent;
 import jakarta.servlet.http.HttpSessionBindingListener;

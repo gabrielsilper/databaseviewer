@@ -1,4 +1,4 @@
-package com.github.gabrielsilper.databaseviewer.connection;
+package com.github.gabrielsilper.databaseviewer.form;
 
 public class ConnectionForm{
     private String host = "localhost";

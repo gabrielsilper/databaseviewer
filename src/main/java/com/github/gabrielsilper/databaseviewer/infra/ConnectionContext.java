@@ -1,4 +1,4 @@
-package com.github.gabrielsilper.databaseviewer.connection;
+package com.github.gabrielsilper.databaseviewer.infra;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;

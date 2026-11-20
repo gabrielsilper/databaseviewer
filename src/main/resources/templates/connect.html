@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Conectar ao banco</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <main>
     <h1>Conectar ao banco MySQL</h1>
 
-    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <div th:replace="~{fragments/layout :: messages}"></div>
 
-    <form th:action="@{/database/connect}"
+    <form th:action="@{/connect}"
           th:object="${connectionForm}"
           method="post">
 
