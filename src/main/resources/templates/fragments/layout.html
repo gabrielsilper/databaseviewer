@@ -3,23 +3,22 @@
 <body>
 
 <!-- Cabeçalho das páginas que usam conexão: título + menu -->
-<header th:fragment="header(title)" class="app-header">
+<header th:fragment="header(title)" class="viewer-header">
     <h1 th:text="${title}">Título</h1>
 
-    <nav class="app-nav">
-        <a th:href="@{/viewer}">Viewer</a>
+    <nav>
+        <a th:href="@{/viewer}">Viewer</a> |
+        <a th:href="@{/produtos}">Reajuste de preço</a> |
+        <a th:href="@{/relatorio}">Relatório do vendedor</a> |
+        <a th:href="@{/venda}">Venda</a> |
         <a th:href="@{/connect}">Sair da conexão</a>
     </nav>
 </header>
 
 <!-- Mensagens de sucesso/erro (flash attributes ou atributos do model) -->
 <div th:fragment="messages">
-    <p class="message message-success"
-       th:if="${successMessage}"
-       th:text="${successMessage}"></p>
-    <p class="message message-error"
-       th:if="${errorMessage}"
-       th:text="${errorMessage}"></p>
+    <p th:if="${successMessage}" th:text="${successMessage}"></p>
+    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 </div>
 
 </body>

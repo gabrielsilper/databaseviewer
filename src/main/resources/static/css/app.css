@@ -8,9 +8,7 @@ main {
     padding: 1rem;
 }
 
-/* ---------- layout comum (fragments/layout.html) ---------- */
-
-.app-header {
+.viewer-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -18,31 +16,9 @@ main {
     margin-bottom: 1rem;
 }
 
-.app-nav {
-    display: flex;
-    gap: 1rem;
-}
-
-.app-nav a {
+.disconnect-link {
     color: #263238;
 }
-
-.message {
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-}
-
-.message-success {
-    background-color: #e4f7e7;
-    color: #1b5e20;
-}
-
-.message-error {
-    background-color: #fde7e7;
-    color: #b71c1c;
-}
-
-/* ---------- viewer ---------- */
 
 .viewer-container {
     display: flex;

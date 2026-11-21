@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reajuste de preço</title>
+</head>
+<body>
+<main>
+    <header th:replace="~{fragments/layout :: header('Reajuste de preço')}"></header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <h2>Consultar</h2>
+
+    <form th:action="@{/produtos}" method="get">
+        <input type="hidden" name="todos" value="true">
+        <button type="submit">Consultar todos os produtos</button>
+    </form>
+
+    <form th:action="@{/produtos}" method="get">
+        <label for="codigo-consulta">Código</label>
+        <input id="codigo-consulta" type="number" name="codigo" min="1"
+               th:value="${codigo}" required>
+        <button type="submit">Consultar produto</button>
+    </form>
+
+    <h2>Reajustar preço</h2>
+
+    <form th:action="@{/produtos/reajuste}" method="post">
+        <label for="codigo-reajuste">Código</label>
+        <input id="codigo-reajuste" type="number" name="codigo" min="1"
+               th:value="${codigo}" required>
+
+        <label for="percentual">Percentual (%)</label>
+        <input id="percentual" type="number" name="percentual" step="0.01" required>
+
+        <button type="submit">Reajustar</button>
+    </form>
+
+    <table th:if="${not #lists.isEmpty(produtos)}" border="1">
+        <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Saldo</th>
+            <th>Ativo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${produtos}">
+            <td th:text="${p.codigo}"></td>
+            <td th:text="${p.nome}"></td>
+            <td th:text="${'R$ ' + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}"></td>
+            <td th:text="${p.saldo}"></td>
+            <td th:text="${p.ativo} ? 'Sim' : 'Não'"></td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

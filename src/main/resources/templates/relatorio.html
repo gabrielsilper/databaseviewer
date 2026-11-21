@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório do vendedor</title>
+</head>
+<body>
+<main>
+    <header th:replace="~{fragments/layout :: header('Relatório do vendedor')}"></header>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <form th:action="@{/relatorio}" method="get">
+        <label for="vendedor">Vendedor</label>
+        <select id="vendedor" name="vendedor" required>
+            <option value="">Selecione...</option>
+            <option th:each="v : ${vendedores}"
+                    th:value="${v.codigo}"
+                    th:selected="${v.codigo == vendedorSelecionado}"
+                    th:text="${v.codigo + ' - ' + v.nome + (v.ativo ? '' : ' (desligado)')}">
+                Vendedor
+            </option>
+        </select>
+
+        <label for="mes">Mês</label>
+        <input id="mes" type="number" name="mes" min="1" max="12" th:value="${mes}" required>
+
+        <label for="ano">Ano</label>
+        <input id="ano" type="number" name="ano" min="2000" th:value="${ano}" required>
+
+        <button type="submit">Gerar relatório</button>
+    </form>
+
+    <th:block th:if="${relatorio != null}">
+        <h2 th:text="${relatorio.resumo.nome}">Vendedor</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Mês/Ano</th>
+                <th>Nº de vendas</th>
+                <th>Comissão</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td th:text="${#numbers.formatInteger(mes, 2) + '/' + ano}"></td>
+                <td th:text="${relatorio.resumo.qtdeVendas}"></td>
+                <td th:text="${'R$ ' + #numbers.formatDecimal(relatorio.resumo.comissao, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>Histórico de comissões</h2>
+
+        <table th:if="${not #lists.isEmpty(relatorio.comissoes)}">
+            <thead>
+            <tr>
+                <th>Mês/Ano</th>
+                <th>Comissão</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${relatorio.comissoes}">
+                <td th:text="${#numbers.formatInteger(c.mes, 2) + '/' + c.ano}"></td>
+                <td th:text="${'R$ ' + #numbers.formatDecimal(c.valor, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(relatorio.comissoes)}">Nenhuma comissão registrada.</p>
+    </th:block>
+</main>
+</body>
+</html>
