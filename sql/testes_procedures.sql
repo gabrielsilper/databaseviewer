@@ -197,11 +197,19 @@ update produto set prosaldo = @saldo_original_7 where procodigo = 7;
 -- =====================================================================
 -- PARTE 5 - GRAN FINALE: FLUXO DE VENDA (uma sessão só)
 -- =====================================================================
--- Em UMA transação, aberta aqui (é o que a página de venda faz no Java):
---   sp_abre_venda -> sp_adiciona_item_venda
---     (baixa saldo com for update -> itemvenda -> trigger da comissão)
+-- A transação está DENTRO da sp_tx_registra_venda:
+--   start transaction
+--   -> sp_abre_venda -> sp_adiciona_item_venda
+--      (baixa saldo com for update -> itemvenda -> trigger da comissão)
 --   -> commit
--- Se qualquer passo falhar: rollback de TUDO.
+-- Se qualquer passo falhar, o exit handler faz rollback de TUDO e
+-- devolve o erro (resignal). É exatamente o que a página de venda chama.
+--
+-- Ela equivale a este bloco manual:
+--   start transaction;
+--   call sp_abre_venda(...);
+--   call sp_adiciona_item_venda(...);
+--   commit;        -- ou rollback; se der erro
 -- ---------------------------------------------------------------------
 
 -- ESTADO ANTES ---------------------------------------------------------
@@ -212,10 +220,7 @@ select * from funcionariocomissao where fcfuncodigo = 9;
 
 -- CENÁRIO DE SUCESSO ---------------------------------------------------
 -- venda 301: filial 2, cliente 8, vendedor 9, Dinheiro, produto 21, qtde 2
-start transaction;
-call sp_abre_venda(301, 2, 8, 9, 1);
-call sp_adiciona_item_venda(301, 21, 2);
-commit;
+call sp_tx_registra_venda(301, 2, 8, 9, 1, 21, 2);
 
 select * from venda where vencodigo = 301;            -- a venda existe
 select * from itemvenda where itvvencodigo = 301;     -- o item existe
@@ -226,13 +231,9 @@ select * from funcionariocomissao where fcfuncodigo = 9;  -- comissão do mês a
 -- CENÁRIO DE FALHA -----------------------------------------------------
 -- venda 302: os dados da venda são válidos, então a venda É INSERIDA...
 -- mas o item pede 99 unidades do produto 7, que não tem esse saldo.
--- O erro acontece depois do insert da venda -> rollback desfaz o insert.
-start transaction;
-call sp_abre_venda(302, 2, 8, 9, 1);         -- ok: a venda 302 é inserida
-call sp_adiciona_item_venda(302, 7, 99);
+-- O erro acontece depois do insert da venda -> o handler faz rollback.
+call sp_tx_registra_venda(302, 2, 8, 9, 1, 7, 99);
 -- Error Code: 1644. Saldo insuficiente para o produto 7: saldo 3, pedido 99.
-select * from venda where vencodigo = 302;   -- DENTRO da transação a venda aparece...
-rollback;                                    -- ...então desistimos de tudo
 
 select * from venda where vencodigo = 302;            -- vazio: a venda NÃO ficou
 select * from itemvenda where itvvencodigo = 302;     -- vazio
@@ -240,27 +241,25 @@ select procodigo, pronome, prosaldo from produto
 where procodigo = 7;                                  -- saldo continua 3
 select * from funcionariocomissao where fcfuncodigo = 9;  -- comissão igual à de depois da venda 301
 
--- OUTRAS FALHAS (rode cada bloco; todos terminam em rollback) ----------
-start transaction;
-call sp_abre_venda(303, 2, 9999, 9, 1);       -- cliente inexistente
-rollback;
-
-start transaction;
-call sp_abre_venda(303, 2, 8, 6, 1);          -- vendedor 6 foi desligado
-rollback;
-
-start transaction;
-call sp_abre_venda(303, 2, 8, 9, 1);
-call sp_adiciona_item_venda(303, 2, 1);       -- produto 2 está inativo
-rollback;
-
-start transaction;
-call sp_abre_venda(303, 2, 8, 9, 1);
-call sp_adiciona_item_venda(303, 21, 0);      -- quantidade inválida
-rollback;
-
-start transaction;
-call sp_abre_venda(301, 2, 8, 9, 1);          -- código 301 já existe
-rollback;
+-- OUTRAS FALHAS (todas terminam em rollback, nada é gravado) -----------
+call sp_tx_registra_venda(303, 2, 9999, 9, 1, 21, 1);  -- cliente inexistente
+call sp_tx_registra_venda(303, 2, 8, 6, 1, 21, 1);     -- vendedor 6 foi desligado
+call sp_tx_registra_venda(303, 2, 8, 9, 1, 2, 1);      -- produto 2 está inativo
+call sp_tx_registra_venda(303, 2, 8, 9, 1, 21, 0);     -- quantidade inválida
+call sp_tx_registra_venda(301, 2, 8, 9, 1, 21, 1);     -- código 301 já existe
 
 select * from venda where vencodigo = 303;    -- vazio: nada foi gravado
+
+
+-- =====================================================================
+-- PARTE 6 - REAJUSTE DE PREÇO EM TRANSAÇÃO
+-- =====================================================================
+-- sp_tx_reajusta_preco trava a linha (for update), reajusta e devolve
+-- o preço anterior e o novo. Se der erro, rollback.
+-- ---------------------------------------------------------------------
+call sp_tx_reajusta_preco(21, 10);      -- preco_anterior 1200.00, preco_novo 1320.00
+call sp_tx_reajusta_preco(9999, 10);    -- erro: Produto não encontrado.
+call sp_tx_reajusta_preco(21, -100);    -- erro: percentual inválido; preço não muda
+
+-- limpeza: volta o preço original
+update produto set propreco = 1200.00 where procodigo = 21;

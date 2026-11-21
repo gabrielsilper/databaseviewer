@@ -328,9 +328,9 @@ delimiter ;
 
 
 -- =====================================================================
--- VENDA (etapas; a transação fica com quem chama)
+-- VENDA (etapas; a transação fica na sp_tx_registra_venda, no fim do arquivo)
 -- =====================================================================
--- Fluxo, dentro de UMA transação aberta pela aplicação:
+-- Fluxo, dentro de UMA transação:
 --   sp_abre_venda -> sp_adiciona_item_venda
 --     -> sp_baixa_saldo_produto (for update)
 --     -> insert itemvenda -> trigger tg_atualiza_saldo_produto (comissão)
@@ -447,5 +447,83 @@ begin
 
     INSERT INTO itemvenda (itvvencodigo, itvprocodigo, itvqtde)
     VALUES (p_vencodigo, p_procodigo, p_qtde);
+end$$
+delimiter ;
+
+
+-- =====================================================================
+-- TRANSAÇÕES
+-- =====================================================================
+-- Cada sp_tx_ é UMA transação completa: abre, chama as procedures de
+-- etapa acima (que não abrem transação) e confirma.
+-- O exit handler pega QUALQUER erro (signal das etapas, chave duplicada,
+-- deadlock...): faz rollback de tudo e, com o resignal, devolve o MESMO
+-- erro para quem chamou (Java ou Workbench).
+-- A aplicação Java só faz: CALL sp_tx_...(...)
+
+-- Venda completa (1 item): cabeçalho + baixa de saldo + item + comissão
+drop procedure if exists sp_tx_registra_venda;
+delimiter $$
+create procedure sp_tx_registra_venda(
+    p_vencodigo int,
+    p_filcodigo int,
+    p_clicodigo int,
+    p_funcodigo int,
+    p_fpcodigo smallint,
+    p_procodigo int,
+    p_qtde int
+)
+begin
+    declare exit handler for sqlexception
+    begin
+        rollback;
+        resignal;
+    end;
+
+    start transaction;
+
+    call sp_abre_venda(p_vencodigo, p_filcodigo, p_clicodigo, p_funcodigo, p_fpcodigo);
+    -- baixa o saldo (for update), insere o item e o trigger atualiza a comissão
+    call sp_adiciona_item_venda(p_vencodigo, p_procodigo, p_qtde);
+
+    commit;
+end$$
+delimiter ;
+
+-- Reajuste de preço: devolve o preço anterior e o novo
+drop procedure if exists sp_tx_reajusta_preco;
+delimiter $$
+create procedure sp_tx_reajusta_preco(p_procodigo int, p_percentual double)
+begin
+    declare v_preco_anterior double default null;
+
+    declare exit handler for sqlexception
+    begin
+        rollback;
+        resignal;
+    end;
+
+    start transaction;
+
+    -- trava a linha: ninguém muda o preço entre esta leitura e o update
+    SELECT propreco into v_preco_anterior
+    FROM produto
+    WHERE procodigo = p_procodigo
+        FOR UPDATE;
+
+    -- valida (produto existe, percentual > -100) e faz o update
+    call sp_reajusta_preco_produto(p_procodigo, p_percentual);
+
+    commit;
+
+    SELECT
+        procodigo,
+        pronome,
+        v_preco_anterior as preco_anterior,
+        propreco as preco_novo
+    FROM
+        produto
+    WHERE
+        procodigo = p_procodigo;
 end$$
 delimiter ;
