@@ -1,7 +1,5 @@
 -- =====================================================================
 -- PROCEDURES DO PROJETO
--- Rode DEPOIS do dumpstate.sql, no banco apdb.
--- O script pode ser executado mais de uma vez (drop procedure if exists).
 -- =====================================================================
 
 -- Minha procedure para listar os nomes dos bancos
@@ -198,7 +196,6 @@ delimiter ;
 -- =====================================================================
 
 -- Minha procedure para consultar preço e saldo de um produto
--- (é a "leitura" usada nos testes de isolamento)
 drop procedure if exists sp_consulta_produto;
 delimiter $$
 create procedure sp_consulta_produto(p_procodigo int)
@@ -217,7 +214,6 @@ end$$
 delimiter ;
 
 -- Minha procedure para reajustar o preço de um produto em um percentual
--- (é a "escrita" usada nos testes de isolamento)
 drop procedure if exists sp_reajusta_preco_produto;
 delimiter $$
 create procedure sp_reajusta_preco_produto(p_procodigo int, p_percentual double)
@@ -282,30 +278,6 @@ begin
                                          and fcmes = p_mes
     WHERE
         vefuncodigo = p_funcodigo;
-end$$
-delimiter ;
-
--- Detalhe do mês: cada venda do vendedor com cliente e valor
-drop procedure if exists sp_lista_vendas_vendedor;
-delimiter $$
-create procedure sp_lista_vendas_vendedor(p_funcodigo int, p_ano int, p_mes int)
-begin
-    SELECT
-        vencodigo as venda,
-        vendata as data,
-        clinome as cliente,
-        SUM(propreco * itvqtde) as valor
-    FROM
-        venda
-            join cliente on clicodigo = venclicodigo
-            join itemvenda on itvvencodigo = vencodigo
-            join produto on procodigo = itvprocodigo
-    WHERE
-        venfuncodigo = p_funcodigo
-      AND YEAR(vendata) = p_ano
-      AND MONTH(vendata) = p_mes
-    GROUP BY vencodigo, vendata, clinome
-    ORDER BY vendata, vencodigo;
 end$$
 delimiter ;
 
@@ -442,7 +414,6 @@ begin
         signal sqlstate '45000' set message_text = v_msg;
     end if;
 
-    -- primeiro trava e baixa o saldo (se não tiver saldo, já para aqui)
     call sp_baixa_saldo_produto(p_procodigo, p_qtde);
 
     INSERT INTO itemvenda (itvvencodigo, itvprocodigo, itvqtde)
