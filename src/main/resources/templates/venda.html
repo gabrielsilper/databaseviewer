@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Venda</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <main>
@@ -10,48 +11,62 @@
     <div th:replace="~{fragments/layout :: messages}"></div>
 
     <section th:if="${opcoes != null}">
-        <form th:action="@{/venda}" th:object="${vendaForm}" method="post">
-            <label for="vencodigo">Código da venda</label>
-            <input id="vencodigo" type="number" min="1" th:field="*{vencodigo}" required>
+        <form th:action="@{/venda}" th:object="${vendaForm}" method="post" class="sell-form">
+            <div>
+                <label for="vencodigo">Código da venda</label>
+                <input id="vencodigo" type="number" min="1" th:field="*{vencodigo}" required>
+            </div>
 
-            <label for="filcodigo">Filial</label>
-            <select id="filcodigo" th:field="*{filcodigo}" required>
-                <option value="">Selecione...</option>
-                <option th:each="o : ${opcoes.filiais}" th:value="${o.codigo}"
-                        th:text="${o.codigo + ' - ' + o.nome}"></option>
-            </select>
+            <div>
+                <label for="filcodigo">Filial</label>
+                <select id="filcodigo" th:field="*{filcodigo}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="o : ${opcoes.filiais}" th:value="${o.codigo}"
+                            th:text="${o.codigo + ' - ' + o.nome}"></option>
+                </select>
+            </div>
 
-            <label for="clicodigo">Cliente</label>
-            <select id="clicodigo" th:field="*{clicodigo}" required>
-                <option value="">Selecione...</option>
-                <option th:each="o : ${opcoes.clientes}" th:value="${o.codigo}"
-                        th:text="${o.codigo + ' - ' + o.nome}"></option>
-            </select>
+            <div>
+                <label for="clicodigo">Cliente</label>
+                <select id="clicodigo" th:field="*{clicodigo}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="o : ${opcoes.clientes}" th:value="${o.codigo}"
+                            th:text="${o.codigo + ' - ' + o.nome}"></option>
+                </select>
+            </div>
 
-            <label for="funcodigo">Vendedor</label>
-            <select id="funcodigo" th:field="*{funcodigo}" required>
-                <option value="">Selecione...</option>
-                <option th:each="v : ${opcoes.vendedores}" th:value="${v.codigo}"
-                        th:text="${v.codigo + ' - ' + v.nome}"></option>
-            </select>
+            <div>
+                <label for="funcodigo">Vendedor</label>
+                <select id="funcodigo" th:field="*{funcodigo}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="v : ${opcoes.vendedores}" th:value="${v.codigo}"
+                            th:text="${v.codigo + ' - ' + v.nome}"></option>
+                </select>
+            </div>
 
-            <label for="fpcodigo">Forma de pagamento</label>
-            <select id="fpcodigo" th:field="*{fpcodigo}" required>
-                <option value="">Selecione...</option>
-                <option th:each="o : ${opcoes.formasPagamento}" th:value="${o.codigo}"
-                        th:text="${o.nome}"></option>
-            </select>
+            <div>
+                <label for="fpcodigo">Forma de pagamento</label>
+                <select id="fpcodigo" th:field="*{fpcodigo}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="o : ${opcoes.formasPagamento}" th:value="${o.codigo}"
+                            th:text="${o.nome}"></option>
+                </select>
+            </div>
 
-            <label for="procodigo">Produto</label>
-            <select id="procodigo" th:field="*{procodigo}" required>
-                <option value="">Selecione...</option>
-                <option th:each="p : ${opcoes.produtos}" th:value="${p.codigo}"
-                        th:text="${p.codigo + ' - ' + p.nome + ' (saldo ' + p.saldo + ', R$ '
-                                  + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA') + ')'}"></option>
-            </select>
+            <div>
+                <label for="procodigo">Produto</label>
+                <select id="procodigo" th:field="*{procodigo}" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="p : ${opcoes.produtos}" th:value="${p.codigo}"
+                            th:text="${p.codigo + ' - ' + p.nome + ' (saldo ' + p.saldo + ', R$ '
+                                      + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA') + ')'}"></option>
+                </select>
+            </div>
 
-            <label for="qtde">Quantidade</label>
-            <input id="qtde" type="number" min="1" th:field="*{qtde}" required>
+            <div>
+                <label for="qtde">Quantidade</label>
+                <input id="qtde" type="number" min="1" th:field="*{qtde}" required>
+            </div>
 
             <button type="submit">Registrar venda</button>
         </form>
