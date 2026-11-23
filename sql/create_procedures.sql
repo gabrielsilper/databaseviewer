@@ -304,14 +304,13 @@ delimiter ;
 -- =====================================================================
 -- Fluxo, dentro de UMA transação:
 --   sp_abre_venda -> sp_adiciona_item_venda
---     -> sp_baixa_saldo_produto (for update)
+--     -> sp_baixa_saldo_produto
 --     -> insert itemvenda -> trigger tg_atualiza_saldo_produto (comissão)
 --   -> commit (ou rollback de tudo se qualquer etapa der signal/erro)
 
+-------------------------------------------------------------------------
+
 -- Minha procedure para dar baixa no saldo (estoque) de um produto
--- O "for update" trava a linha do produto até o fim da transação:
--- outra sessão que tentar baixar o mesmo produto fica esperando,
--- assim duas vendas não vendem o mesmo item ao mesmo tempo.
 drop procedure if exists sp_baixa_saldo_produto;
 delimiter $$
 create procedure sp_baixa_saldo_produto(p_procodigo int, p_qtde int)
@@ -321,8 +320,7 @@ begin
 
     SELECT prosaldo into v_saldo
     FROM produto
-    WHERE procodigo = p_procodigo
-        FOR UPDATE;
+    WHERE procodigo = p_procodigo;
 
     if v_saldo is null then
         set v_msg = concat('Produto ', p_procodigo, ' não encontrado.');
@@ -425,12 +423,7 @@ delimiter ;
 -- =====================================================================
 -- TRANSAÇÕES
 -- =====================================================================
--- Cada sp_tx_ é UMA transação completa: abre, chama as procedures de
--- etapa acima (que não abrem transação) e confirma.
--- O exit handler pega QUALQUER erro (signal das etapas, chave duplicada,
--- deadlock...): faz rollback de tudo e, com o resignal, devolve o MESMO
--- erro para quem chamou (Java ou Workbench).
--- A aplicação Java só faz: CALL sp_tx_...(...)
+-- Cada sp_tx_ é UMA transação completa
 
 -- Venda completa (1 item): cabeçalho + baixa de saldo + item + comissão
 drop procedure if exists sp_tx_registra_venda;
@@ -454,7 +447,6 @@ begin
     start transaction;
 
     call sp_abre_venda(p_vencodigo, p_filcodigo, p_clicodigo, p_funcodigo, p_fpcodigo);
-    -- baixa o saldo (for update), insere o item e o trigger atualiza a comissão
     call sp_adiciona_item_venda(p_vencodigo, p_procodigo, p_qtde);
 
     commit;
@@ -476,11 +468,9 @@ begin
 
     start transaction;
 
-    -- trava a linha: ninguém muda o preço entre esta leitura e o update
     SELECT propreco into v_preco_anterior
     FROM produto
-    WHERE procodigo = p_procodigo
-        FOR UPDATE;
+    WHERE procodigo = p_procodigo;
 
     -- valida (produto existe, percentual > -100) e faz o update
     call sp_reajusta_preco_produto(p_procodigo, p_percentual);
