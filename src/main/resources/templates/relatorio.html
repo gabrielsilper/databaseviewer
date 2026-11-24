@@ -31,29 +31,10 @@
         <button type="submit" th:formaction="@{/relatorio}" formmethod="get">Ver relatórios</button>
     </form>
 
-    <th:block th:if="${relatorio != null}">
-        <h2 th:text="${relatorio.resumo.nome}">Vendedor</h2>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Mês/Ano</th>
-                <th>Nº de vendas</th>
-                <th>Comissão</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td th:text="${#numbers.formatInteger(mes, 2) + '/' + ano}"></td>
-                <td th:text="${relatorio.resumo.qtdeVendas}"></td>
-                <td th:text="${'R$ ' + #numbers.formatDecimal(relatorio.resumo.comissao, 1, 'POINT', 2, 'COMMA')}"></td>
-            </tr>
-            </tbody>
-        </table>
-
+    <th:block th:if="${comissoes != null}">
         <h2>Relatórios gerados</h2>
 
-        <table th:if="${not #lists.isEmpty(relatorio.comissoes)}">
+        <table th:if="${not #lists.isEmpty(comissoes)}">
             <thead>
             <tr>
                 <th>Mês/Ano</th>
@@ -61,13 +42,13 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="c : ${relatorio.comissoes}">
+            <tr th:each="c : ${comissoes}">
                 <td th:text="${#numbers.formatInteger(c.mes, 2) + '/' + c.ano}"></td>
                 <td th:text="${'R$ ' + #numbers.formatDecimal(c.valor, 1, 'POINT', 2, 'COMMA')}"></td>
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(relatorio.comissoes)}">Nenhum relatório gerado.</p>
+        <p th:if="${#lists.isEmpty(comissoes)}">Nenhum relatório gerado.</p>
     </th:block>
 </main>
 </body>

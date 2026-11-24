@@ -1,7 +1,6 @@
 package com.github.gabrielsilper.databaseviewer.repository;
 
 import com.github.gabrielsilper.databaseviewer.model.Comissao;
-import com.github.gabrielsilper.databaseviewer.model.ResumoVendedor;
 import com.github.gabrielsilper.databaseviewer.model.Vendedor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -19,21 +18,6 @@ public class VendedorRepository {
                         rs.getString("nome"),
                         rs.getBoolean("ativo")
                 )
-        );
-    }
-
-    public ResumoVendedor totalVendas(JdbcTemplate jdbc, int vendedor, int ano, int mes) {
-        return jdbc.queryForObject(
-                "CALL sp_total_vendas_vendedor_gabriel(?, ?, ?)",
-                (rs, rowNum) -> new ResumoVendedor(
-                        rs.getInt("vendedor"),
-                        rs.getString("nome"),
-                        rs.getInt("qtde_vendas"),
-                        rs.getBigDecimal("comissao")
-                ),
-                vendedor,
-                ano,
-                mes
         );
     }
 

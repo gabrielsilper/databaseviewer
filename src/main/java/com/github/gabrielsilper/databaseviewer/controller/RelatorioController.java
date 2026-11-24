@@ -51,10 +51,7 @@ public class RelatorioController {
             model.addAttribute("vendedores", relatorioService.listaVendedores(connection));
 
             if (vendedor != null) {
-                model.addAttribute(
-                        "relatorio",
-                        relatorioService.consulta(connection, vendedor, anoSelecionado, mesSelecionado)
-                );
+                model.addAttribute("comissoes", relatorioService.listaRelatorios(connection, vendedor));
             }
         } catch (RuntimeException exception) {
             model.addAttribute("errorMessage", SqlErrorMessage.from(exception));
