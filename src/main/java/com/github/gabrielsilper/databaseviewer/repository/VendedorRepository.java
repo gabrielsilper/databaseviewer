@@ -13,7 +13,7 @@ public class VendedorRepository {
 
     public List<Vendedor> listaVendedores(JdbcTemplate jdbc) {
         return jdbc.query(
-                "CALL sp_lista_vendedores()",
+                "CALL sp_lista_vendedores_gabriel()",
                 (rs, rowNum) -> new Vendedor(
                         rs.getInt("codigo"),
                         rs.getString("nome"),
@@ -24,7 +24,7 @@ public class VendedorRepository {
 
     public ResumoVendedor totalVendas(JdbcTemplate jdbc, int vendedor, int ano, int mes) {
         return jdbc.queryForObject(
-                "CALL sp_total_vendas_vendedor(?, ?, ?)",
+                "CALL sp_total_vendas_vendedor_gabriel(?, ?, ?)",
                 (rs, rowNum) -> new ResumoVendedor(
                         rs.getInt("vendedor"),
                         rs.getString("nome"),
@@ -37,9 +37,13 @@ public class VendedorRepository {
         );
     }
 
+    public void geraRelatorio(JdbcTemplate jdbc, int vendedor, int ano, int mes) {
+        jdbc.update("CALL sp_ajusta_fc_comissao_gabriel(?, ?, ?)", vendedor, ano, mes);
+    }
+
     public List<Comissao> listaComissoes(JdbcTemplate jdbc, int vendedor) {
         return jdbc.query(
-                "CALL sp_lista_comissoes_vendedor(?)",
+                "CALL sp_lista_comissoes_vendedor_gabriel(?)",
                 (rs, rowNum) -> new Comissao(
                         rs.getInt("ano"),
                         rs.getInt("mes"),

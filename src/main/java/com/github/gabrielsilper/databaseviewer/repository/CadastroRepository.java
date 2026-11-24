@@ -16,14 +16,14 @@ public class CadastroRepository {
     );
 
     public List<Opcao> listaFiliais(JdbcTemplate jdbc) {
-        return jdbc.query("CALL sp_lista_filiais()", OPCAO);
+        return jdbc.query("CALL sp_lista_filiais_gabriel()", OPCAO);
     }
 
     public List<Opcao> listaClientesAtivos(JdbcTemplate jdbc) {
-        return jdbc.query("CALL sp_lista_clientes_ativos()", OPCAO);
+        return jdbc.query("CALL sp_lista_clientes_ativos_gabriel()", OPCAO);
     }
 
     public List<Opcao> listaFormasPagamentoAtivas(JdbcTemplate jdbc) {
-        return jdbc.query("CALL sp_lista_formas_pagamento_ativas()", OPCAO);
+        return jdbc.query("CALL sp_lista_formas_pagamento_ativas_gabriel()", OPCAO);
     }
 }

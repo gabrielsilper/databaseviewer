@@ -3,9 +3,9 @@
 -- =====================================================================
 
 -- Minha procedure para listar os nomes dos bancos
-drop procedure if exists sp_lista_nomes_bancos;
+drop procedure if exists sp_lista_nomes_bancos_gabriel;
 delimiter $$
-create procedure sp_lista_nomes_bancos()
+create procedure sp_lista_nomes_bancos_gabriel()
 begin
     SELECT
         schema_name as nome_banco
@@ -16,9 +16,9 @@ end$$
 delimiter ;
 
 -- Minha procedure para listar os nomes das tabelas
-drop procedure if exists sp_lista_nomes_tabelas;
+drop procedure if exists sp_lista_nomes_tabelas_gabriel;
 delimiter $$
-create procedure sp_lista_nomes_tabelas(p_schema varchar(50))
+create procedure sp_lista_nomes_tabelas_gabriel(p_schema varchar(50))
 begin
     SELECT
         TABLE_NAME
@@ -31,9 +31,9 @@ end$$
 delimiter ;
 
 -- Minha procedure para listar os nomes das colunas, os seus tipos e se são nulas ou não
-drop procedure if exists sp_lista_nomes_colunas;
+drop procedure if exists sp_lista_nomes_colunas_gabriel;
 delimiter $$
-create procedure sp_lista_nomes_colunas(p_schema varchar(50), p_table_name varchar(50))
+create procedure sp_lista_nomes_colunas_gabriel(p_schema varchar(50), p_table_name varchar(50))
 begin
     SELECT
         COLUMN_NAME as nome_coluna,
@@ -49,9 +49,9 @@ end$$
 delimiter ;
 
 -- Minha procedures para listar os nomes das tabelas lado 1 e lado n
-drop procedure if exists sp_lista_nomes_tabelas_lado_1;
+drop procedure if exists sp_lista_nomes_tabelas_lado_1_gabriel;
 delimiter $$
-create procedure sp_lista_nomes_tabelas_lado_1(
+create procedure sp_lista_nomes_tabelas_lado_1_gabriel(
     p_schema varchar(50),
     p_table_name varchar(50)
 )
@@ -69,9 +69,9 @@ begin
 end$$
 delimiter ;
 
-drop procedure if exists sp_lista_nomes_tabelas_lado_n;
+drop procedure if exists sp_lista_nomes_tabelas_lado_n_gabriel;
 delimiter $$
-create procedure sp_lista_nomes_tabelas_lado_n(
+create procedure sp_lista_nomes_tabelas_lado_n_gabriel(
     p_schema varchar(50),
     p_table_name varchar(50)
 )
@@ -94,9 +94,9 @@ delimiter ;
 -- =====================================================================
 
 -- Todos os produtos (página de reajuste)
-drop procedure if exists sp_lista_produtos;
+drop procedure if exists sp_lista_produtos_gabriel;
 delimiter $$
-create procedure sp_lista_produtos()
+create procedure sp_lista_produtos_gabriel()
 begin
     SELECT
         procodigo,
@@ -111,9 +111,9 @@ end$$
 delimiter ;
 
 -- Só os produtos ativos (select da página de venda)
-drop procedure if exists sp_lista_produtos_ativos;
+drop procedure if exists sp_lista_produtos_ativos_gabriel;
 delimiter $$
-create procedure sp_lista_produtos_ativos()
+create procedure sp_lista_produtos_ativos_gabriel()
 begin
     SELECT
         procodigo,
@@ -132,9 +132,9 @@ delimiter ;
 -- Vendedores: a tabela vendedor só tem o código, ela especializa
 -- funcionario. O nome vem do join com funcionario.
 -- ativo = 1 quando o funcionário não foi desligado (fundtdem is null).
-drop procedure if exists sp_lista_vendedores;
+drop procedure if exists sp_lista_vendedores_gabriel;
 delimiter $$
-create procedure sp_lista_vendedores()
+create procedure sp_lista_vendedores_gabriel()
 begin
     SELECT
         vefuncodigo as codigo,
@@ -147,9 +147,9 @@ begin
 end$$
 delimiter ;
 
-drop procedure if exists sp_lista_filiais;
+drop procedure if exists sp_lista_filiais_gabriel;
 delimiter $$
-create procedure sp_lista_filiais()
+create procedure sp_lista_filiais_gabriel()
 begin
     SELECT
         filcodigo as codigo,
@@ -160,9 +160,9 @@ begin
 end$$
 delimiter ;
 
-drop procedure if exists sp_lista_clientes_ativos;
+drop procedure if exists sp_lista_clientes_ativos_gabriel;
 delimiter $$
-create procedure sp_lista_clientes_ativos()
+create procedure sp_lista_clientes_ativos_gabriel()
 begin
     SELECT
         clicodigo as codigo,
@@ -175,9 +175,9 @@ begin
 end$$
 delimiter ;
 
-drop procedure if exists sp_lista_formas_pagamento_ativas;
+drop procedure if exists sp_lista_formas_pagamento_ativas_gabriel;
 delimiter $$
-create procedure sp_lista_formas_pagamento_ativas()
+create procedure sp_lista_formas_pagamento_ativas_gabriel()
 begin
     SELECT
         fpcodigo as codigo,
@@ -196,9 +196,9 @@ delimiter ;
 -- =====================================================================
 
 -- Minha procedure para consultar preço e saldo de um produto
-drop procedure if exists sp_consulta_produto;
+drop procedure if exists sp_consulta_produto_gabriel;
 delimiter $$
-create procedure sp_consulta_produto(p_procodigo int)
+create procedure sp_consulta_produto_gabriel(p_procodigo int)
 begin
     SELECT
         procodigo,
@@ -214,9 +214,9 @@ end$$
 delimiter ;
 
 -- Minha procedure para reajustar o preço de um produto em um percentual
-drop procedure if exists sp_reajusta_preco_produto;
+drop procedure if exists sp_reajusta_preco_produto_gabriel;
 delimiter $$
-create procedure sp_reajusta_preco_produto(p_procodigo int, p_percentual double)
+create procedure sp_reajusta_preco_produto_gabriel(p_procodigo int, p_percentual double)
 begin
     if not exists (select 1 from produto where procodigo = p_procodigo) then
         signal sqlstate '45000' set message_text = 'Produto não encontrado.';
@@ -241,9 +241,9 @@ delimiter ;
 
 -- Resumo do mês: quantidade de vendas, valor total e comissão do mês.
 -- Sempre devolve UMA linha (zeros quando não houve venda no mês).
-drop procedure if exists sp_total_vendas_vendedor;
+drop procedure if exists sp_total_vendas_vendedor_gabriel;
 delimiter $$
-create procedure sp_total_vendas_vendedor(p_funcodigo int, p_ano int, p_mes int)
+create procedure sp_total_vendas_vendedor_gabriel(p_funcodigo int, p_ano int, p_mes int)
 begin
     if not exists (select 1 from vendedor where vefuncodigo = p_funcodigo) then
         signal sqlstate '45000' set message_text = 'Vendedor não encontrado.';
@@ -281,10 +281,10 @@ begin
 end$$
 delimiter ;
 
--- Histórico de comissões (tabela funcionariocomissao, mantida pelo trigger)
-drop procedure if exists sp_lista_comissoes_vendedor;
+-- Minha procedure para consultar o histórico de comissões
+drop procedure if exists sp_lista_comissoes_vendedor_gabriel;
 delimiter $$
-create procedure sp_lista_comissoes_vendedor(p_funcodigo int)
+create procedure sp_lista_comissoes_vendedor_gabriel(p_funcodigo int)
 begin
     SELECT
         fcano as ano,
@@ -300,20 +300,20 @@ delimiter ;
 
 
 -- =====================================================================
--- VENDA (etapas; a transação fica na sp_tx_registra_venda, no fim do arquivo)
+-- VENDA (etapas; a transação fica na sp_tx_registra_venda_gabriel, no fim do arquivo)
 -- =====================================================================
 -- Fluxo, dentro de UMA transação:
---   sp_abre_venda -> sp_adiciona_item_venda
---     -> sp_baixa_saldo_produto
---     -> insert itemvenda -> trigger tg_atualiza_saldo_produto (comissão)
+--   sp_abre_venda_gabriel -> sp_adiciona_item_venda_gabriel
+--     -> sp_baixa_saldo_produto_gabriel
+--     -> insert itemvenda
 --   -> commit (ou rollback de tudo se qualquer etapa der signal/erro)
 
--------------------------------------------------------------------------
+-- =====================================================================
 
 -- Minha procedure para dar baixa no saldo (estoque) de um produto
-drop procedure if exists sp_baixa_saldo_produto;
+drop procedure if exists sp_baixa_saldo_produto_gabriel;
 delimiter $$
-create procedure sp_baixa_saldo_produto(p_procodigo int, p_qtde int)
+create procedure sp_baixa_saldo_produto_gabriel(p_procodigo int, p_qtde int)
 begin
     declare v_saldo int default null;
     declare v_msg varchar(128);
@@ -340,9 +340,9 @@ end$$
 delimiter ;
 
 -- Etapa 1 da venda: valida os dados e insere o cabeçalho na tabela venda
-drop procedure if exists sp_abre_venda;
+drop procedure if exists sp_abre_venda_gabriel;
 delimiter $$
-create procedure sp_abre_venda(
+create procedure sp_abre_venda_gabriel(
     p_vencodigo int,
     p_filcodigo int,
     p_clicodigo int,
@@ -387,13 +387,9 @@ end$$
 delimiter ;
 
 -- Etapa 2 da venda: adiciona um item, dando baixa no saldo do produto
--- O insert em itemvenda dispara o trigger tg_atualiza_saldo_produto
--- (aula 26/10, criado no dumpstate.sql), que recalcula a comissão do
--- vendedor no mês da venda. Como o trigger roda DENTRO da mesma
--- transação, um rollback desfaz a comissão também.
-drop procedure if exists sp_adiciona_item_venda;
+drop procedure if exists sp_adiciona_item_venda_gabriel;
 delimiter $$
-create procedure sp_adiciona_item_venda(p_vencodigo int, p_procodigo int, p_qtde int)
+create procedure sp_adiciona_item_venda_gabriel(p_vencodigo int, p_procodigo int, p_qtde int)
 begin
     declare v_msg varchar(128);
 
@@ -412,7 +408,7 @@ begin
         signal sqlstate '45000' set message_text = v_msg;
     end if;
 
-    call sp_baixa_saldo_produto(p_procodigo, p_qtde);
+    call sp_baixa_saldo_produto_gabriel(p_procodigo, p_qtde);
 
     INSERT INTO itemvenda (itvvencodigo, itvprocodigo, itvqtde)
     VALUES (p_vencodigo, p_procodigo, p_qtde);
@@ -425,10 +421,10 @@ delimiter ;
 -- =====================================================================
 -- Cada sp_tx_ é UMA transação completa
 
--- Venda completa (1 item): cabeçalho + baixa de saldo + item + comissão
-drop procedure if exists sp_tx_registra_venda;
+-- Venda completa (1 item): cabeçalho + baixa de saldo + item
+drop procedure if exists sp_tx_registra_venda_gabriel;
 delimiter $$
-create procedure sp_tx_registra_venda(
+create procedure sp_tx_registra_venda_gabriel(
     p_vencodigo int,
     p_filcodigo int,
     p_clicodigo int,
@@ -446,17 +442,17 @@ begin
 
     start transaction;
 
-    call sp_abre_venda(p_vencodigo, p_filcodigo, p_clicodigo, p_funcodigo, p_fpcodigo);
-    call sp_adiciona_item_venda(p_vencodigo, p_procodigo, p_qtde);
+    call sp_abre_venda_gabriel(p_vencodigo, p_filcodigo, p_clicodigo, p_funcodigo, p_fpcodigo);
+    call sp_adiciona_item_venda_gabriel(p_vencodigo, p_procodigo, p_qtde);
 
     commit;
 end$$
 delimiter ;
 
 -- Reajuste de preço: devolve o preço anterior e o novo
-drop procedure if exists sp_tx_reajusta_preco;
+drop procedure if exists sp_tx_reajusta_preco_gabriel;
 delimiter $$
-create procedure sp_tx_reajusta_preco(p_procodigo int, p_percentual double)
+create procedure sp_tx_reajusta_preco_gabriel(p_procodigo int, p_percentual double)
 begin
     declare v_preco_anterior double default null;
 
@@ -473,7 +469,7 @@ begin
     WHERE procodigo = p_procodigo;
 
     -- valida (produto existe, percentual > -100) e faz o update
-    call sp_reajusta_preco_produto(p_procodigo, p_percentual);
+    call sp_reajusta_preco_produto_gabriel(p_procodigo, p_percentual);
 
     commit;
 
@@ -486,5 +482,35 @@ begin
         produto
     WHERE
         procodigo = p_procodigo;
+end$$
+delimiter ;
+
+
+-- Minha procedure para gerar o relatório (comissão) do vendedor no mês
+drop procedure if exists sp_ajusta_fc_comissao_gabriel;
+delimiter $$
+create procedure sp_ajusta_fc_comissao_gabriel(p_funcodigo int, p_ano int, p_mes int)
+begin
+    INSERT INTO funcionariocomissao (fcfuncodigo, fcano, fcmes, fcvalor)
+    SELECT
+        venfuncodigo,
+        YEAR(vendata),
+        MONTH(vendata),
+        ROUND(SUM(propreco * itvqtde * (grpcomissao / 100)), 2)
+    FROM
+        itemvenda
+            JOIN venda ON vencodigo = itvvencodigo
+            JOIN produto ON procodigo = itvprocodigo
+            JOIN grupoproduto ON grpcodigo = progrpcodigo
+    WHERE
+        venfuncodigo = p_funcodigo
+      AND YEAR(vendata) = p_ano
+      AND MONTH(vendata) = p_mes
+    GROUP BY
+        venfuncodigo,
+        YEAR(vendata),
+        MONTH(vendata)
+    ON DUPLICATE KEY UPDATE
+        fcvalor = VALUES(fcvalor);
 end$$
 delimiter ;

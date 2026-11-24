@@ -22,22 +22,22 @@ public class ProdutoRepository {
     );
 
     public List<Produto> listaProdutos(JdbcTemplate jdbc) {
-        return jdbc.query("CALL sp_lista_produtos()", PRODUTO);
+        return jdbc.query("CALL sp_lista_produtos_gabriel()", PRODUTO);
     }
 
     public List<Produto> listaProdutosAtivos(JdbcTemplate jdbc) {
-        return jdbc.query("CALL sp_lista_produtos_ativos()", PRODUTO);
+        return jdbc.query("CALL sp_lista_produtos_ativos_gabriel()", PRODUTO);
     }
 
     public Optional<Produto> consultaProduto(JdbcTemplate jdbc, int codigo) {
-        return jdbc.query("CALL sp_consulta_produto(?)", PRODUTO, codigo)
+        return jdbc.query("CALL sp_consulta_produto_gabriel(?)", PRODUTO, codigo)
                 .stream()
                 .findFirst();
     }
 
     public Reajuste reajustaPreco(JdbcTemplate jdbc, int codigo, BigDecimal percentual) {
         return jdbc.queryForObject(
-                "CALL sp_tx_reajusta_preco(?, ?)",
+                "CALL sp_tx_reajusta_preco_gabriel(?, ?)",
                 (rs, rowNum) -> new Reajuste(
                         rs.getInt("procodigo"),
                         rs.getString("pronome"),

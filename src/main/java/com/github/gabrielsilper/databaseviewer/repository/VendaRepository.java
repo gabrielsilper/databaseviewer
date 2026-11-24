@@ -9,7 +9,7 @@ public class VendaRepository {
 
     public void registraVenda(JdbcTemplate jdbc, VendaForm venda) {
         jdbc.update(
-                "CALL sp_tx_registra_venda(?, ?, ?, ?, ?, ?, ?)",
+                "CALL sp_tx_registra_venda_gabriel(?, ?, ?, ?, ?, ?, ?)",
                 venda.getVencodigo(),
                 venda.getFilcodigo(),
                 venda.getClicodigo(),

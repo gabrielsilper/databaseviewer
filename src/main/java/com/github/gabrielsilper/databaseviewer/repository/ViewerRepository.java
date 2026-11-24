@@ -14,16 +14,16 @@ import java.util.List;
 public class ViewerRepository {
 
     public List<String> findDatabases(JdbcTemplate jdbc) {
-        return jdbc.queryForList("CALL sp_lista_nomes_bancos()", String.class);
+        return jdbc.queryForList("CALL sp_lista_nomes_bancos_gabriel()", String.class);
     }
 
     public List<String> findTables(JdbcTemplate jdbc, String database) {
-        return jdbc.queryForList("CALL sp_lista_nomes_tabelas(?)", String.class, database);
+        return jdbc.queryForList("CALL sp_lista_nomes_tabelas_gabriel(?)", String.class, database);
     }
 
     public List<ColumnInfo> findColumns(JdbcTemplate jdbc, String database, String table) {
         return jdbc.query(
-                "CALL sp_lista_nomes_colunas(?, ?)",
+                "CALL sp_lista_nomes_colunas_gabriel(?, ?)",
                 (resultSet, rowNum) -> new ColumnInfo(
                         resultSet.getString("nome_coluna"),
                         resultSet.getString("tipo_coluna"),
@@ -37,7 +37,7 @@ public class ViewerRepository {
     /** Tabelas que esta tabela referencia (ela é o lado N, elas o lado 1). */
     public List<String> findOneSideTables(JdbcTemplate jdbc, String database, String table) {
         return jdbc.queryForList(
-                "CALL sp_lista_nomes_tabelas_lado_1(?, ?)",
+                "CALL sp_lista_nomes_tabelas_lado_1_gabriel(?, ?)",
                 String.class,
                 database,
                 table
@@ -47,7 +47,7 @@ public class ViewerRepository {
     /** Tabelas que referenciam esta tabela (ela é o lado 1, elas o lado N). */
     public List<String> findManySideTables(JdbcTemplate jdbc, String database, String table) {
         return jdbc.queryForList(
-                "CALL sp_lista_nomes_tabelas_lado_n(?, ?)",
+                "CALL sp_lista_nomes_tabelas_lado_n_gabriel(?, ?)",
                 String.class,
                 database,
                 table

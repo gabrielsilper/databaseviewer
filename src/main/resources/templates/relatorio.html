@@ -9,7 +9,7 @@
     <header th:replace="~{fragments/layout :: header('Relatório do vendedor')}"></header>
     <div th:replace="~{fragments/layout :: messages}"></div>
 
-    <form th:action="@{/relatorio}" method="get">
+    <form th:action="@{/relatorio/gerar}" method="post">
         <label for="vendedor">Vendedor</label>
         <select id="vendedor" name="vendedor" required>
             <option value="">Selecione...</option>
@@ -28,6 +28,7 @@
         <input id="ano" type="number" name="ano" min="2000" th:value="${ano}" required>
 
         <button type="submit">Gerar relatório</button>
+        <button type="submit" th:formaction="@{/relatorio}" formmethod="get">Ver relatórios</button>
     </form>
 
     <th:block th:if="${relatorio != null}">
@@ -50,7 +51,7 @@
             </tbody>
         </table>
 
-        <h2>Histórico de comissões</h2>
+        <h2>Relatórios gerados</h2>
 
         <table th:if="${not #lists.isEmpty(relatorio.comissoes)}">
             <thead>
@@ -66,7 +67,7 @@
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(relatorio.comissoes)}">Nenhuma comissão registrada.</p>
+        <p th:if="${#lists.isEmpty(relatorio.comissoes)}">Nenhum relatório gerado.</p>
     </th:block>
 </main>
 </body>

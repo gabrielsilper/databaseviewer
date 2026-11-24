@@ -22,10 +22,13 @@ public class RelatorioService {
         return vendedorRepository.listaVendedores(connection.jdbcTemplate());
     }
 
-    public RelatorioVendedor gera(ConnectionContext connection, int vendedor, int ano, int mes) {
-        if (mes < 1 || mes > 12) {
-            throw new IllegalArgumentException("Mês deve estar entre 1 e 12.");
-        }
+    public void geraRelatorio(ConnectionContext connection, int vendedor, int ano, int mes) {
+        validaMes(mes);
+        vendedorRepository.geraRelatorio(connection.jdbcTemplate(), vendedor, ano, mes);
+    }
+
+    public RelatorioVendedor consulta(ConnectionContext connection, int vendedor, int ano, int mes) {
+        validaMes(mes);
 
         JdbcTemplate jdbc = connection.jdbcTemplate();
 
@@ -33,5 +36,11 @@ public class RelatorioService {
                 vendedorRepository.totalVendas(jdbc, vendedor, ano, mes),
                 vendedorRepository.listaComissoes(jdbc, vendedor)
         );
+    }
+
+    private void validaMes(int mes) {
+        if (mes < 1 || mes > 12) {
+            throw new IllegalArgumentException("Mês deve estar entre 1 e 12.");
+        }
     }
 }
