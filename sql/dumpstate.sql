@@ -1412,15 +1412,15 @@ INSERT INTO `zona` VALUES
 UNLOCK TABLES;
 
 --
--- Table structure for table `funcionariocomissao` (aula 26/10)
+-- Table structure for table `funcionariocomissao_` (aula 26/10)
 -- Comissão de cada funcionário por mês/ano.
 -- Valor = soma de (preço do produto * quantidade * % de comissão do grupo).
 --
 
-DROP TABLE IF EXISTS `funcionariocomissao`;
+DROP TABLE IF EXISTS `funcionariocomissao_`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `funcionariocomissao` (
+CREATE TABLE `funcionariocomissao_` (
   `fcfuncodigo` int(11) NOT NULL,
   `fcano` int(11) NOT NULL,
   `fcmes` int(11) NOT NULL,
@@ -1431,10 +1431,10 @@ CREATE TABLE `funcionariocomissao` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Carga inicial de `funcionariocomissao` a partir das vendas já existentes
+-- Carga inicial de `funcionariocomissao_` a partir das vendas já existentes
 --
 
-INSERT INTO `funcionariocomissao` (fcfuncodigo, fcano, fcmes, fcvalor)
+INSERT INTO `funcionariocomissao_` (fcfuncodigo, fcano, fcmes, fcvalor)
 SELECT
     venfuncodigo,
     YEAR(vendata),

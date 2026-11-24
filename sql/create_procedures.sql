@@ -273,7 +273,7 @@ begin
                   AND MONTH(vendata) = p_mes
                 GROUP BY venfuncodigo
             ) t on t.venfuncodigo = vefuncodigo
-            left join funcionariocomissao on fcfuncodigo = vefuncodigo
+            left join funcionariocomissao_ on fcfuncodigo = vefuncodigo
                                          and fcano = p_ano
                                          and fcmes = p_mes
     WHERE
@@ -291,7 +291,7 @@ begin
         fcmes as mes,
         fcvalor as valor
     FROM
-        funcionariocomissao
+        funcionariocomissao_
     WHERE
         fcfuncodigo = p_funcodigo
     ORDER BY fcano desc, fcmes desc;
@@ -491,7 +491,7 @@ drop procedure if exists sp_ajusta_fc_comissao_gabriel;
 delimiter $$
 create procedure sp_ajusta_fc_comissao_gabriel(p_funcodigo int, p_ano int, p_mes int)
 begin
-    INSERT INTO funcionariocomissao (fcfuncodigo, fcano, fcmes, fcvalor)
+    INSERT INTO funcionariocomissao_ (fcfuncodigo, fcano, fcmes, fcvalor)
     SELECT
         venfuncodigo,
         YEAR(vendata),
